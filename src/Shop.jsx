@@ -1,8 +1,5 @@
-// Ваш Shop компонент
-import React, { useEffect } from "react";
-import Category from "./modules/UI/shop components/category/Category"; // Предположим, что у вас есть компонент для отображения категорий
-
-// Import necessary components from react-router-dom
+//Shop component
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -12,6 +9,12 @@ import {
   setCategories,
   setCategoriesFailure,
 } from "./redux/actions/productsActions";
+
+import { Drawer, Button, List, ListItem, ListItemButton, Box } from "@mui/joy";
+
+import Category from "./modules/UI/shop components/category/Category";
+import ProductDetails from "./modules/UI/shop components/product details/ProductDetails";
+
 export default function Shop() {
   const fetchProducts = () => {
     return (dispatch) => {
@@ -54,33 +57,65 @@ export default function Shop() {
   const categories_error = useSelector((state) => state.products.loading);
 
   console.log(categories);
+
+  const [openDrawer, setOpenDrawer] = React.useState(false);
+
+  const handleDrawerOpen = () => {
+    setOpenDrawer(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpenDrawer(false);
+  };
+
+  const [currentPathname, setPath] = useState(window.location.pathname);
+  const [shouldRenderButton, setButton] = useState(
+    !currentPathname.includes("/product/")
+  );
+
   return (
     <Router>
-      <div>
-        <nav>
-          <ul>
-            {categories.map((category) => {
-              return (
-                <li>
-                  <Link to={`${category}`}>{category}</Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+      <Box>
+        {/* Conditionally render the button based on the route */}
+        {shouldRenderButton && (
+          <Button
+            sx={{ position: "fixed", left: "10%", width: "80%", zIndex: 100 }}
+            color="neutral"
+            onClick={handleDrawerOpen}
+          >
+            Open Categories
+          </Button>
+        )}
+
+        {/* Drawer component */}
+        <Drawer open={openDrawer} onClose={handleDrawerClose}>
+          <List>
+            {categories.map((category) => (
+              <ListItem key={category}>
+                <ListItemButton
+                  component={Link}
+                  to={`/${category}`}
+                  onClick={handleDrawerClose}
+                >
+                  {category}
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Drawer>
 
         <Routes>
-          {categories.map((category) => {
-            return (
-              <Route
-                path={`/${category}`}
-                element={<Category categoryName={category} />}
-              />
-            );
-          })}
-          <Route path="/" element={<div>Добро пожаловать в магазин</div>} />
+          {categories.map((category) => (
+            <Route
+              key={category}
+              path={`/${category}`}
+              element={<Category categoryName={category} />}
+            />
+          ))}
+          <Route path="/product/:id" element={<ProductDetails />} />
+          <Route path="/" element={<Category categoryName={categories[0]} />} />
         </Routes>
-      </div>
+      </Box>
     </Router>
   );
 }

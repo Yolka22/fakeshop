@@ -15,7 +15,7 @@ export default function Category({ categoryName }) {
   );
 
   return (
-    <Box>
+    <Box sx={{paddingTop:5}}>
       <Typography level="h2" textAlign="center">{categoryName}</Typography>
       <Box
         sx={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 2 }}
